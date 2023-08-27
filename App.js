@@ -1,119 +1,103 @@
+import 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
-import { Text, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { useColorScheme } from 'react-native';
 import { MD3DarkTheme, MD3LightTheme, PaperProvider } from 'react-native-paper';
-import React, { useState, useCallback, useRef, useEffect } from "react";
-import YoutubePlayer from "react-native-youtube-iframe";
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
+import YoutubePlayerScreen from './pages/YoutubePlayerScreen';
+
 export default function App() {
-  const playerRef = useRef();
-  const [elapsed, setElapsed] = useState(0);
-  const [totalTime, setTotalTime] = useState(0);
-  const [playing, setPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [playback, setPlayback] = useState(1);
-  const [playbackRates, setPlaybackRates] = useState([]);
-
   const colorScheme = useColorScheme();
-  const paperTheme = colorScheme === 'dark' ? MD3DarkTheme : MD3LightTheme
+  const paperTheme = colorScheme === 'dark' ? MD3DarkTheme : MD3LightTheme;
 
-  const onStateChange = useCallback((state) => {
-    if (state === "ended") {
-      setPlaying(false);
-    }
-  }, []);
-
-  const togglePlaying = useCallback(() => {
-    setPlaying((prev) => !prev);
-  }, []);
-
-  const toggleMute = useCallback(() => {
-    setIsMuted((prev) => !prev);
-  }, []);
-
-  const togglePlayback = useCallback(() => {
-    setPlayback((prev) => {
-      const index = playbackRates.indexOf(prev);
-      const nextIndex = (index + 1) % playbackRates.length;
-      return playbackRates[nextIndex];
-    });
-  }, []);
-
-  const calculateTime = (time) => {
-    const elapsed_ms = Math.floor(time * 1000);
-    const min = Math.floor(elapsed_ms / 60000);
-    const seconds = Math.floor((elapsed_ms - min * 60000) / 1000);
-
-    return min.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0')
-  }
-
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      const elapsed_sec = await playerRef.current.getCurrentTime();
-      const total_sec = await playerRef.current.getDuration();
-
-      setElapsed(calculateTime(elapsed_sec));
-      setTotalTime(calculateTime(total_sec));
-
-      setPlayback(await playerRef.current.getPlaybackRate());
-      setPlaybackRates(await playerRef.current.getAvailablePlaybackRates());
-    }, 100);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
+  const Drawer = createDrawerNavigator();
 
   return (
     <PaperProvider theme={paperTheme}>
-      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: paperTheme.colors.background, padding: 14, gap: 30 }}>
-        <Text style={{ color: paperTheme.colors.tertiary, fontSize: 36, fontWeight: 'bold', textAlign: 'center' }}>Youtube Player</Text>
 
-        <View style={{}}>
-          <YoutubePlayer
-            ref={playerRef}
-            height={200}
-            play={playing}
-            mute={isMuted}
-            playbackRate={playback}
-            videoId={"Uw0mLXWIb6Q"}
-            onChangeState={onStateChange}
-            initialPlayerParams={{
-              controls: false,
-              preventFullScreen: true,
-            }}
-            webViewProps={{
-              allowsInlineMediaPlayback: true,
-              allowsFullscreenVideo: false,
-              mediaPlaybackRequiresUserAction: false,
-              borderRadius: 12,
-            }}
+      <NavigationContainer>
+        <Drawer.Navigator
+          screenOptions={({ route }) => ({
+            headerStyle: { backgroundColor: paperTheme.colors.surface, },
+            headerTintColor: paperTheme.colors.primary,
+            headerTitleStyle: { fontSize: 20, },
+            headerShadowVisible: false,
+
+            drawerActiveBackgroundColor: paperTheme.colors.primary,
+            drawerActiveTintColor: paperTheme.colors.surface,
+            drawerStyle: { backgroundColor: paperTheme.colors.surface, },
+            drawerInactiveTintColor: paperTheme.colors.secondary,
+
+            drawerIcon: ({ focused, color, size }) => {
+              let iconName;
+
+              if (route.name === 'Youtube Player') {
+                iconName = focused ? 'youtube' : 'youtube';
+              } else if (route.name === 'Youtube') {
+                iconName = focused ? 'youtube' : 'youtube';
+              }
+
+              return <Icon name={iconName} size={size} color={color} />;
+            }
+          })}
+        >
+          <Drawer.Screen
+            name="Youtube Player"
+            component={TabNavigation}
+            initialParams={{ paperTheme: paperTheme }}
           />
-        </View>
+          <Drawer.Screen
+            name="Youtube"
+            component={YoutubePlayerScreen}
+            initialParams={{ paperTheme: paperTheme }}
+          />
+        </Drawer.Navigator>
+      </NavigationContainer>
 
-        <View style={{ flexDirection: 'row', gap: 12, justifyContent: 'space-evenly' }}>
-          <TouchableOpacity onPress={toggleMute} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: paperTheme.colors.secondaryContainer, borderRadius: 12, padding: 8, alignSelf: 'flex-start' }}>
-            <Icon name={isMuted ? 'volume-off' : 'volume-high'} size={24} color={paperTheme.colors.secondary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={togglePlayback} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: paperTheme.colors.secondaryContainer, borderRadius: 12, padding: 12, width: 64, justifyContent: 'center' }}>
-            <Text style={{ color: paperTheme.colors.secondary, fontWeight: '600' }}>{playback}x</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={togglePlaying} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: paperTheme.colors.primaryContainer, borderRadius: 12, padding: 8, alignSelf: 'flex-start' }}>
-            <Icon name={playing ? 'pause' : 'play'} size={24} color={paperTheme.colors.primary} />
-            <Text style={{ color: paperTheme.colors.primary, paddingRight: 2 }}>{playing ? 'Pause' : 'Play'}</Text>
-          </TouchableOpacity>
-
-          <View style={{ flexDirection: 'row', gap: 4, backgroundColor: paperTheme.colors.tertiaryContainer, borderRadius: 12, padding: 8, paddingVertical: 12, alignSelf: 'flex-start' }}>
-            <Text style={{ color: paperTheme.colors.tertiary, fontWeight: '600' }}>{elapsed}</Text>
-            <Text style={{ color: paperTheme.colors.tertiary }}>{'/'}</Text>
-            <Text style={{ color: paperTheme.colors.tertiary }}>{totalTime}</Text>
-          </View>
-        </View>
-
-        <StatusBar style="auto" />
-      </View>
+      <StatusBar style="auto" />
     </PaperProvider>
+  );
+}
+
+
+const TabNavigation = ({ route }) => {
+  const Tab = createBottomTabNavigator();
+  const { paperTheme } = route.params;
+
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarActiveTintColor: paperTheme.colors.primary,
+        tabBarInactiveTintColor: paperTheme.colors.text,
+        tabBarStyle: {
+          backgroundColor: paperTheme.colors.surface,
+          borderTopColor: paperTheme.colors.border,
+        },
+        headerStyle: {
+          backgroundColor: paperTheme.colors.surface,
+          shadowColor: paperTheme.colors.shadow,
+        },
+        headerTintColor: paperTheme.colors.secondary,
+
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          if (route.name === 'Youtube Player') {
+            iconName = focused ? 'youtube' : 'youtube';
+          } else if (route.name === 'Youtube') {
+            iconName = focused ? 'youtube' : 'youtube';
+          }
+
+          return <Icon name={iconName} size={size} color={color} />;
+        }
+      })}
+    >
+      <Tab.Screen name="Youtube Player" component={YoutubePlayerScreen} initialParams={{ paperTheme: paperTheme }} />
+      <Tab.Screen name="Youtube" component={YoutubePlayerScreen} initialParams={{ paperTheme: paperTheme }} />
+
+    </Tab.Navigator>
   );
 }
