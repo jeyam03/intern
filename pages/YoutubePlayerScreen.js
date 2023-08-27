@@ -2,9 +2,10 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import YoutubePlayer from "react-native-youtube-iframe";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Text, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { useTheme } from '../ThemeProvider';
 
-const YoutubePlayerScreen = ({ route }) => {
-  const { paperTheme } = route.params;
+const YoutubePlayerScreen = ({ }) => {
+  const { paperTheme } = useTheme();
 
   const playerRef = useRef();
   const [elapsed, setElapsed] = useState(0);
@@ -46,15 +47,30 @@ const YoutubePlayerScreen = ({ route }) => {
 
   useEffect(() => {
     const interval = setInterval(async () => {
-      const elapsed_sec = await playerRef.current.getCurrentTime();
-      const total_sec = await playerRef.current.getDuration();
+      let elapsed_sec = 0;
+      let total_sec = 0;
+
+      if (playerRef !== null && playerRef.current !== null) {
+        await playerRef.current.getCurrentTime()
+          .then((time) => { elapsed_sec = time; })
+          .catch((error) => { console.log(error); });
+
+        await playerRef.current.getDuration()
+          .then((time) => { total_sec = time; })
+          .catch((error) => { console.log(error); });
+
+        await playerRef.current.getPlaybackRate()
+          .then((rate) => { setPlayback(rate); })
+          .catch((error) => { console.log(error); });
+
+        await playerRef.current.getAvailablePlaybackRates()
+          .then((rates) => { setPlaybackRates(rates); })
+          .catch((error) => { console.log(error); });
+      }
 
       setElapsed(calculateTime(elapsed_sec));
       setTotalTime(calculateTime(total_sec));
-
-      setPlayback(await playerRef.current.getPlaybackRate());
-      setPlaybackRates(await playerRef.current.getAvailablePlaybackRates());
-    }, 100);
+    }, 500);
 
     return () => {
       clearInterval(interval);
