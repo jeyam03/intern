@@ -1,10 +1,10 @@
 import 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
-import { useColorScheme } from 'react-native';
+import { View, Text, useColorScheme, Image } from 'react-native';
 import { MD3DarkTheme, MD3LightTheme, PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import React from 'react';
 import { ThemeProvider } from './ThemeProvider';
@@ -21,6 +21,7 @@ export default function App() {
 
         <NavigationContainer>
           <Drawer.Navigator
+            drawerContent={(props) => <CustomDrawerContent {...props} />}
             screenOptions={({ route }) => ({
               headerStyle: { backgroundColor: paperTheme.colors.surface, },
               headerTintColor: paperTheme.colors.primary,
@@ -93,5 +94,28 @@ const TabNavigation = ({ }) => {
       <Tab.Screen name="Tab 2" component={YoutubePlayerScreen} />
 
     </Tab.Navigator>
+  );
+}
+
+const CustomDrawerContent = props => {
+  const paperTheme = useColorScheme() === 'dark' ? MD3DarkTheme : MD3LightTheme;
+
+  return (
+    <View style={{ flex: 1 }}>
+      <DrawerContentScrollView {...props}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, marginBottom: 20 }}>
+          <View>
+            <Text style={{ fontSize: 24, color: paperTheme.colors.primary }}>Hello, John Doe</Text>
+            <Text style={{ fontSize: 12, color: paperTheme.colors.secondary }}>johndoe@example.com</Text>
+          </View>
+          <Image source={{ uri: 'https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg' }} style={{ width: 50, height: 50, borderRadius: 25 }} />
+        </View>
+        <DrawerItemList {...props} />
+      </DrawerContentScrollView>
+      <View style={{ borderTopWidth: 0.5, borderTopColor: paperTheme.colors.border, padding: 16, marginBottom: 24, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <Icon name="location-exit" size={24} color={paperTheme.colors.secondary} />
+        <Text style={{ fontSize: 18, color: paperTheme.colors.secondary }}>Logout</Text>
+      </View>
+    </View>
   );
 }
