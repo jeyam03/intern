@@ -30,6 +30,12 @@
           <string>com.jeyam03.intern</string>
         </array>
       </dict>
+      <dict>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>com.googleusercontent.apps.599678160419-ctbho3ej896rgukc1rg4mrfg0nbvv09k</string>
+        </array>
+      </dict>
     </array>
     <key>CFBundleVersion</key>
     <string>1</string>

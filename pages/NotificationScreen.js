@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Text, TouchableOpacity, View, useColorScheme, Button } from 'react-native';
+import { Text, TouchableOpacity, View, useColorScheme, Button, Alert } from 'react-native';
 import { useTheme } from '../ThemeProvider';
 import notifee, { EventType, TimestampTrigger, TriggerType } from '@notifee/react-native';
+import messaging from '@react-native-firebase/messaging';
 
 const NotificationScreen = ({ }) => {
   const { paperTheme } = useTheme();
@@ -20,11 +21,37 @@ const NotificationScreen = ({ }) => {
     });
   }, []);
 
-  async function onDisplayNotification() {
-    // Request permissions (required for iOS)
+  async function requestUserPermission() {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+  
+    if (enabled) {
+      console.log('Authorization status:', authStatus);
+    }
+  }
+
+  useEffect(() => {
+    requestUserPermission();
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      // Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+      onDisplayNotification(remoteMessage);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  async function onMessageReceived(message) {
+    console.log('onMessageReceived', message);
+  }
+  
+  messaging().onMessage(onMessageReceived);
+  messaging().setBackgroundMessageHandler(onMessageReceived);
+
+  async function onDisplayNotification(remoteMessage) {
     await notifee.requestPermission()
 
-    // Create a channel (required for Android)
     const channelId = await notifee.createChannel({
       id: 'default',
       name: 'Default Channel',
@@ -32,26 +59,15 @@ const NotificationScreen = ({ }) => {
 
     // Display a notification
     await notifee.displayNotification({
-      title: 'Notification Title',
-      body: 'Main body content of the notification',
+      title: remoteMessage?.notification?.title || 'Notification Title',
+      body: remoteMessage?.notification?.body || 'Notification Body',
       android: {
         channelId,
-        // smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
-        // pressAction is needed if you want the notification to open the app when pressed
         pressAction: {
           id: 'default',
         },
       },
     });
-
-    // await notifee.displayNotification({
-    //   id: '123',
-    //   title: 'Updated Notification Title',
-    //   body: 'Updated main body content of the notification',
-    //   android: {
-    //     channelId,
-    //   },
-    // });
   }
 
   async function getAllTriggers() {
@@ -64,11 +80,10 @@ const NotificationScreen = ({ }) => {
 
   async function onCreateTriggerNotification() {
     const date = new Date(Date.now());
-    date.setHours(8);
-    date.setMinutes(44);
+    date.setHours(12);
+    date.setMinutes(1);
     date.setSeconds(30)
 
-    // Create a trigger notification
     await notifee.createTriggerNotification(
       {
         title: 'Meeting with Jane',
@@ -84,7 +99,7 @@ const NotificationScreen = ({ }) => {
           allowWhileIdle: true,
         }
       },
-    ).then((id) => console.log('Trigger notification created', id, date.getDate()))
+    ).then((id) => console.log('Trigger notification created', id, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds()))
     .catch((err) => console.log('Trigger notification failed to create', err));
   }
 

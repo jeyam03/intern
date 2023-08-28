@@ -16,19 +16,22 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jeyam03.intern"
+      "bundleIdentifier": "com.jeyam03.intern",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.jeyam03.intern"
+      "package": "com.jeyam03.intern",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "@react-native-firebase/app",  
       [
         "expo-build-properties",
         {
@@ -38,6 +41,9 @@
             "extraMavenRepos": [
               "../../node_modules/@notifee/react-native/android/libs"
             ]
+          },
+          "ios": {
+            "useFrameworks": "static"
           }
         }
       ]
