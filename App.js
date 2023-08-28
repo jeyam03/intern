@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, useColorScheme, Image } from 'react-native';
+import { View, Text, useColorScheme, Image, Platform } from 'react-native';
 import { MD3DarkTheme, MD3LightTheme, PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -10,6 +10,7 @@ import React from 'react';
 import { ThemeProvider } from './ThemeProvider';
 
 import YoutubePlayerScreen from './pages/YoutubePlayerScreen';
+import NotificationScreen from './pages/NotificationScreen';
 
 export default function App() {
   const Drawer = createDrawerNavigator();
@@ -61,6 +62,7 @@ export default function App() {
 const TabNavigation = ({ }) => {
   const Tab = createBottomTabNavigator();
   const paperTheme = useColorScheme() === 'dark' ? MD3DarkTheme : MD3LightTheme;
+  const paddingBottom = Platform.OS === 'android' ? 4 : 32;
 
   return (
     <Tab.Navigator
@@ -70,6 +72,7 @@ const TabNavigation = ({ }) => {
         tabBarStyle: {
           backgroundColor: paperTheme.colors.surface,
           borderTopColor: paperTheme.colors.border,
+          paddingBottom: paddingBottom,
         },
         headerStyle: {
           backgroundColor: paperTheme.colors.surface,
@@ -80,18 +83,18 @@ const TabNavigation = ({ }) => {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
-          if (route.name === 'Tab 1') {
+          if (route.name === 'Youtube Player') {
             iconName = focused ? 'youtube' : 'youtube';
-          } else if (route.name === 'Tab 2') {
-            iconName = focused ? 'youtube' : 'youtube';
+          } else if (route.name === 'Notifications') {
+            iconName = focused ? 'bell' : 'bell';
           }
 
           return <Icon name={iconName} size={size} color={color} />;
         }
       })}
     >
-      <Tab.Screen name="Tab 1" component={YoutubePlayerScreen} />
-      <Tab.Screen name="Tab 2" component={YoutubePlayerScreen} />
+      <Tab.Screen name="Youtube Player" component={YoutubePlayerScreen} />
+      <Tab.Screen name="Notifications" component={NotificationScreen} />
 
     </Tab.Navigator>
   );
