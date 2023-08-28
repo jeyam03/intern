@@ -32,6 +32,8 @@
     },
     "plugins": [
       "@react-native-firebase/app",  
+      "@config-plugins/react-native-pdf",
+      "@config-plugins/react-native-blob-util",
       [
         "expo-build-properties",
         {

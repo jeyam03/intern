@@ -6,54 +6,62 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import React from 'react';
+import React, { useEffect } from 'react';
+import * as ScreenOrientation from 'expo-screen-orientation';
 import { ThemeProvider } from './ThemeProvider';
+import { DownloadProvider } from './DownloadContext';
 
 import YoutubePlayerScreen from './pages/YoutubePlayerScreen';
 import NotificationScreen from './pages/NotificationScreen';
+import PdfViewScreen from './pages/PdfViewScreen';
+import PdfDownloadScreen from './pages/PdfDownloadScreen';
 
 export default function App() {
   const Drawer = createDrawerNavigator();
   const paperTheme = useColorScheme() === 'dark' ? MD3DarkTheme : MD3LightTheme;
 
+  useEffect(() => {
+    ScreenOrientation.unlockAsync();
+  }, []);
+
   return (
     <ThemeProvider>
-      <PaperProvider theme={paperTheme}>
+      <DownloadProvider>
+        <PaperProvider theme={paperTheme}>
+          <NavigationContainer>
+            <Drawer.Navigator
+              drawerContent={(props) => <CustomDrawerContent {...props} />}
+              screenOptions={({ route }) => ({
+                headerStyle: { backgroundColor: paperTheme.colors.surface, },
+                headerTintColor: paperTheme.colors.primary,
+                headerTitleStyle: { fontSize: 20, },
+                headerShadowVisible: false,
 
-        <NavigationContainer>
-          <Drawer.Navigator
-            drawerContent={(props) => <CustomDrawerContent {...props} />}
-            screenOptions={({ route }) => ({
-              headerStyle: { backgroundColor: paperTheme.colors.surface, },
-              headerTintColor: paperTheme.colors.primary,
-              headerTitleStyle: { fontSize: 20, },
-              headerShadowVisible: false,
+                drawerActiveBackgroundColor: paperTheme.colors.primary,
+                drawerActiveTintColor: paperTheme.colors.surface,
+                drawerStyle: { backgroundColor: paperTheme.colors.surface, },
+                drawerInactiveTintColor: paperTheme.colors.secondary,
 
-              drawerActiveBackgroundColor: paperTheme.colors.primary,
-              drawerActiveTintColor: paperTheme.colors.surface,
-              drawerStyle: { backgroundColor: paperTheme.colors.surface, },
-              drawerInactiveTintColor: paperTheme.colors.secondary,
+                drawerIcon: ({ focused, color, size }) => {
+                  let iconName;
 
-              drawerIcon: ({ focused, color, size }) => {
-                let iconName;
+                  if (route.name === 'YT & Notifications') {
+                    iconName = focused ? 'youtube' : 'youtube';
+                  } else if (route.name === 'PDF Viewer') {
+                    iconName = focused ? 'file-pdf-box' : 'file-pdf-box';
+                  }
 
-                if (route.name === 'Page 1') {
-                  iconName = focused ? 'youtube' : 'youtube';
-                } else if (route.name === 'Page 2') {
-                  iconName = focused ? 'youtube' : 'youtube';
+                  return <Icon name={iconName} size={size} color={color} />;
                 }
-
-                return <Icon name={iconName} size={size} color={color} />;
-              }
-            })}
-          >
-            <Drawer.Screen name="Page 1" component={TabNavigation} />
-            <Drawer.Screen name="Page 2" component={YoutubePlayerScreen} />
-          </Drawer.Navigator>
-        </NavigationContainer>
-
-        <StatusBar style="auto" />
-      </PaperProvider>
+              })}
+            >
+              <Drawer.Screen name="YT & Notifications" component={TabNavigation} />
+              <Drawer.Screen name="PDF Viewer" component={PdfViewerNavigation} />
+            </Drawer.Navigator>
+          </NavigationContainer>
+          <StatusBar style="auto" />
+        </PaperProvider>
+      </DownloadProvider>
     </ThemeProvider>
   );
 }
@@ -95,6 +103,43 @@ const TabNavigation = ({ }) => {
     >
       <Tab.Screen name="Youtube Player" component={YoutubePlayerScreen} />
       <Tab.Screen name="Notifications" component={NotificationScreen} />
+
+    </Tab.Navigator>
+  );
+}
+
+const PdfViewerNavigation = ({ }) => {
+  const Tab = createBottomTabNavigator();
+  const paperTheme = useColorScheme() === 'dark' ? MD3DarkTheme : MD3LightTheme;
+  const paddingBottom = Platform.OS === 'android' ? 4 : 32;
+
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarActiveTintColor: paperTheme.colors.primary,
+        tabBarInactiveTintColor: paperTheme.colors.text,
+        tabBarStyle: {
+          backgroundColor: paperTheme.colors.surface,
+          borderTopColor: paperTheme.colors.border,
+          paddingBottom: paddingBottom,
+        },
+        headerShown: false,
+
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          if (route.name === "View PDFs") {
+            iconName = focused ? 'file-pdf-box' : 'file-pdf-box';
+          } else if (route.name === "Downloaded PDFs") {
+            iconName = focused ? 'download' : 'download';
+          }
+
+          return <Icon name={iconName} size={size} color={color} />;
+        }
+      })}
+    >
+      <Tab.Screen name="View PDFs" component={PdfViewScreen} />
+      <Tab.Screen name="Downloaded PDFs" component={PdfDownloadScreen} />
 
     </Tab.Navigator>
   );
