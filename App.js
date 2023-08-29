@@ -15,6 +15,7 @@ import YoutubePlayerScreen from './pages/YoutubePlayerScreen';
 import NotificationScreen from './pages/NotificationScreen';
 import PdfViewScreen from './pages/PdfViewScreen';
 import PdfDownloadScreen from './pages/PdfDownloadScreen';
+import RazorpayScreen from './pages/RazorpayScreen';
 
 export default function App() {
   const Drawer = createDrawerNavigator();
@@ -49,6 +50,8 @@ export default function App() {
                     iconName = focused ? 'youtube' : 'youtube';
                   } else if (route.name === 'PDF Viewer') {
                     iconName = focused ? 'file-pdf-box' : 'file-pdf-box';
+                  } else if (route.name === 'Razorpay') {
+                    iconName = focused ? 'cash-multiple' : 'cash-multiple';
                   }
 
                   return <Icon name={iconName} size={size} color={color} />;
@@ -57,6 +60,7 @@ export default function App() {
             >
               <Drawer.Screen name="YT & Notifications" component={TabNavigation} />
               <Drawer.Screen name="PDF Viewer" component={PdfViewerNavigation} />
+              <Drawer.Screen name="Razorpay" component={RazorpayScreen} />
             </Drawer.Navigator>
           </NavigationContainer>
           <StatusBar style="auto" />
