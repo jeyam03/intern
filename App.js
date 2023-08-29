@@ -16,6 +16,7 @@ import NotificationScreen from './pages/NotificationScreen';
 import PdfViewScreen from './pages/PdfViewScreen';
 import PdfDownloadScreen from './pages/PdfDownloadScreen';
 import RazorpayScreen from './pages/RazorpayScreen';
+import UploadFiles from './pages/UploadFiles';
 
 export default function App() {
   const Drawer = createDrawerNavigator();
@@ -52,6 +53,8 @@ export default function App() {
                     iconName = focused ? 'file-pdf-box' : 'file-pdf-box';
                   } else if (route.name === 'Razorpay') {
                     iconName = focused ? 'cash-multiple' : 'cash-multiple';
+                  } else if (route.name === 'File Uploads') {
+                    iconName = focused ? 'nas' : 'nas';
                   }
 
                   return <Icon name={iconName} size={size} color={color} />;
@@ -61,6 +64,7 @@ export default function App() {
               <Drawer.Screen name="YT & Notifications" component={TabNavigation} />
               <Drawer.Screen name="PDF Viewer" component={PdfViewerNavigation} />
               <Drawer.Screen name="Razorpay" component={RazorpayScreen} />
+              <Drawer.Screen name="File Uploads" component={UploadFiles} />
             </Drawer.Navigator>
           </NavigationContainer>
           <StatusBar style="auto" />

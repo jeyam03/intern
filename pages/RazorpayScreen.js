@@ -22,7 +22,7 @@ const RazorpayScreen = ({ }) => {
           fontWeight: 'bold'
         }}>
           Payment Gateway </Text>
-        <Icon name="credit-card-outline" size={24} color={paperTheme.colors.text} />
+        <Icon name="credit-card-outline" size={32} color={paperTheme.colors.text} />
       </View>
 
       <InputComponent
@@ -94,13 +94,16 @@ const RazorpayScreen = ({ }) => {
           margin: 10,
           marginTop: 24,
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          flexDirection: 'row',
+          gap: 8
         }}
       >
+        <Icon name="credit-card" size={28} color={paperTheme.colors.primary} />
         <Text style={{
           color: paperTheme.colors.primary,
-          fontSize: 16,
-          fontWeight: 'semibold'
+          fontSize: 18,
+          fontWeight: '500'
         }}>
           Pay Now</Text>
       </TouchableOpacity>
