@@ -2,11 +2,13 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { Text, TouchableOpacity, View, useColorScheme, Button, Alert } from 'react-native';
 import { useTheme } from '../ThemeProvider';
-import notifee, { EventType, TimestampTrigger, TriggerType } from '@notifee/react-native';
+import notifee, { AndroidImportance, AndroidStyle, EventType, TimestampTrigger, TriggerType } from '@notifee/react-native';
 import messaging from '@react-native-firebase/messaging';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const NotificationScreen = ({ }) => {
   const { paperTheme } = useTheme();
+  const [allTriggers, setAllTriggers] = useState([]);
 
   useEffect(() => {
     return notifee.onForegroundEvent(({ type, detail }) => {
@@ -26,7 +28,7 @@ const NotificationScreen = ({ }) => {
     const enabled =
       authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
       authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-  
+
     if (enabled) {
       console.log('Authorization status:', authStatus);
     }
@@ -42,52 +44,93 @@ const NotificationScreen = ({ }) => {
     return unsubscribe;
   }, []);
 
-  async function onMessageReceived(message) {
-    console.log('onMessageReceived', message);
-  }
-  
-  messaging().onMessage(onMessageReceived);
-  messaging().setBackgroundMessageHandler(onMessageReceived);
-
   async function onDisplayNotification(remoteMessage) {
     await notifee.requestPermission()
+
+    await notifee.setNotificationCategories([
+      {
+        id: 'post',
+        actions: [
+          {
+            id: 'like',
+            title: 'Like Post',
+          },
+          {
+            id: 'dislike',
+            title: 'Dislike Post',
+          },
+        ],
+      },
+    ]);
 
     const channelId = await notifee.createChannel({
       id: 'default',
       name: 'Default Channel',
     });
 
-    // Display a notification
     await notifee.displayNotification({
       title: remoteMessage?.notification?.title || 'Notification Title',
       body: remoteMessage?.notification?.body || 'Notification Body',
+      subtitle: 'Notification Subtitle',
+
+      ios: {
+        attachments: [
+          {
+            url: remoteMessage?.notification?.android?.imageUrl ? remoteMessage?.notification?.android?.imageUrl : 'https://picsum.photos/200/300',
+          },
+        ],
+        categoryId: 'post',
+      },
+
       android: {
         channelId,
         pressAction: {
           id: 'default',
         },
+        smallIcon: 'ic_launcher_round',
+        actions: [
+          {
+            title: '<p style="color: #6D9E6D;"><b>Approve</b> &#128516;</p>',
+            pressAction: { id: 'approve' },
+          },
+          {
+            title: '<p style="color: #f44336;"><b>Cancel</b> &#128532;</p>',
+            pressAction: { id: 'cancel' },
+          },
+        ],
+        showTimestamp: true,
+        style: { type: AndroidStyle.BIGPICTURE, picture: `${remoteMessage?.notification?.android?.imageUrl ? remoteMessage?.notification?.android?.imageUrl : 'https://picsum.photos/200/300'}` },
       },
     });
   }
 
   async function getAllTriggers() {
-    notifee.getTriggerNotificationIds().then(ids => console.log('All trigger notifications: ', ids));
+    notifee.getTriggerNotificationIds().then(
+      (ids) => {
+        notifee.getTriggerNotifications(ids).then(
+          (trigger) => {
+            setAllTriggers(trigger);
+          }
+        );
+      },
+    );
   }
+
+  useEffect(() => {
+    getAllTriggers();
+  }, []);
 
   async function cancel(notificationId) {
     await notifee.cancelNotification(notificationId);
+    getAllTriggers();
   }
 
   async function onCreateTriggerNotification() {
-    const date = new Date(Date.now());
-    date.setHours(12);
-    date.setMinutes(1);
-    date.setSeconds(30)
-
     await notifee.createTriggerNotification(
       {
         title: 'Meeting with Jane',
-        body: 'Today at 11:20am',
+        body: `Today at ${date.getHours()}:${date.getMinutes()}`,
+        subtitle: 'Trigger Notification',
         android: {
           channelId: 'your-channel-id',
         },
@@ -99,8 +142,11 @@ const NotificationScreen = ({ }) => {
           allowWhileIdle: true,
         }
       },
-    ).then((id) => console.log('Trigger notification created', id, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds()))
-    .catch((err) => console.log('Trigger notification failed to create', err));
+    ).then((id) => {
+      console.log('Trigger notification created', id, date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds())
+      getAllTriggers();
+    })
+      .catch((err) => console.log('Trigger notification failed to create', err));
   }
 
   notifee.onBackgroundEvent(async ({ type, detail }) => {
@@ -114,14 +160,52 @@ const NotificationScreen = ({ }) => {
     }
   });
 
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', backgroundColor: paperTheme.colors.background, padding: 14, gap: 30 }}>
-      <Text style={{ color: paperTheme.colors.tertiary, fontSize: 36, fontWeight: 'bold', textAlign: 'center' }}>Notification</Text>
+  const [date, setDate] = useState(new Date(Date.now()));
+  const onChange = (event, selectedDate) => {
+    setDate(selectedDate);
+  };
 
-      <Button title="Display Notification" onPress={() => onDisplayNotification()} />
-      <Button title="Cancel Notification" onPress={() => cancel('123')} />
-      <Button title="Create Trigger Notification" onPress={() => onCreateTriggerNotification()} />
-      <Button title="Get All Triggers" onPress={() => getAllTriggers()} />
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', backgroundColor: paperTheme.colors.background, padding: 14, gap: 30, alignItems: 'center', }}>
+      <TouchableOpacity onPress={() => onDisplayNotification()} style={{ backgroundColor: paperTheme.colors.primaryContainer, padding: 12, borderRadius: 12 }} >
+        <Text style={{ color: paperTheme.colors.primary, fontWeight: 500, fontSize: 16 }}>Display Test Notification</Text>
+      </TouchableOpacity>
+
+      <View style={{ flexDirection: 'row', gap: 4, justifyContent: 'space-evenly', marginTop: 72 }}>
+        <Text style={{ width: '30%', textAlign: 'center' }}>Create a time based trigger notification</Text>
+        <DateTimePicker
+          style={{ width: '70%' }}
+          value={date}
+          mode={'datetime'}
+          is24Hour={true}
+          onChange={onChange}
+        />
+      </View>
+      <TouchableOpacity onPress={() => onCreateTriggerNotification()} style={{ backgroundColor: paperTheme.colors.primaryContainer, padding: 12, borderRadius: 12 }} >
+        <Text style={{ color: paperTheme.colors.primary, fontWeight: 500, fontSize: 16 }}>Create Trigger Notification</Text>
+      </TouchableOpacity>
+
+
+      {allTriggers && allTriggers.length > 0 && (
+        <View style={{ marginTop: 72 }}>
+          <Text>Upcoming Notifications</Text>
+
+          {allTriggers.map((trigger, index) => {
+            return (
+              <View key={index} style={{ flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', marginTop: 12, gap: 12 }}>
+                <Text style={{ fontWeight: '500', fontSize: 16, color: paperTheme.colors.tertiary }}>{trigger.notification.title}</Text>
+
+                <Text style={{ fontSize: 14, color: paperTheme.colors.secondary }}>{trigger.notification.body}</Text>
+                <TouchableOpacity onPress={() => cancel(trigger.notification.id)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'darkred', padding: 8, borderRadius: 8 }}>
+                  <Icon name="delete" size={20} color={paperTheme.colors.background} />
+                  <Text style={{ color: paperTheme.colors.background, marginLeft: 8 }}>Remove</Text>
+                </TouchableOpacity>
+              </View>
+            )
+          })}
+        </View>
+      )}
+
     </View>
   );
 };

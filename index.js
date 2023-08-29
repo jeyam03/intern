@@ -5,15 +5,21 @@ import App from './App';
 notifee.onBackgroundEvent(async ({ type, detail }) => {
   const { notification, pressAction } = detail;
 
+  // Define the function to handle incoming messages
+  async function onMessageReceived(message) {
+    console.log('onMessageReceived', message);
+  }
+
+  // Register the listener for incoming messages
+  messaging().onMessage(onMessageReceived);
+  messaging().setBackgroundMessageHandler(onMessageReceived);
+
   messaging().setBackgroundMessageHandler(async remoteMessage => {
     console.log('Message handled in the background!', remoteMessage);
   });
 
   if (type === EventType.ACTION_PRESS && pressAction.id === 'mark-as-read') {
-    // Update external API
     console.log('Marking notification as read', notification);
-    
-    // Remove the notification
     await notifee.cancelNotification(notification.id);
   }
 
