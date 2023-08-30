@@ -9,6 +9,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { useDownloadContext } from '../DownloadContext';
 import * as FileSystem from 'expo-file-system'
 import { shareAsync } from 'expo-sharing';
+import { MD3DarkTheme } from "react-native-paper";
 
 const PdfViewScreen = ({ }) => {
   const { paperTheme } = useTheme();
@@ -134,12 +135,14 @@ const PdfViewScreen = ({ }) => {
           onChange={(value) => { setSelectedValue(value) }}
           valueField={'value'}
           labelField={'label'}
+          activeColor={paperTheme.colors.primary}
+          selectedTextStyle={{ color: paperTheme.colors.primary }}
           style={{ width: '50%' }}
         />
 
         {selectedValue["value"] !== 'pdf3' && (
           pdfDownloaded ?
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'green', padding: 8, borderRadius: 8 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: paperTheme === MD3DarkTheme ? 'lightgreen' : 'darkgreen', padding: 8, borderRadius: 8 }}>
               <Icon name="check" size={20} color={paperTheme.colors.background} />
               <Text style={{ color: paperTheme.colors.background, marginLeft: 8 }}>Downloaded</Text>
             </View>

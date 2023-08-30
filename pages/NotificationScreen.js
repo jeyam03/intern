@@ -174,7 +174,7 @@ const NotificationScreen = ({ }) => {
       </TouchableOpacity>
 
       <View style={{ flexDirection: 'row', gap: 4, justifyContent: 'space-evenly', marginTop: 72 }}>
-        <Text style={{ width: '30%', textAlign: 'center' }}>Create a time based trigger notification</Text>
+        <Text style={{ width: '30%', textAlign: 'center', color: paperTheme.colors.secondary }}>Create a time based trigger notification</Text>
         <DateTimePicker
           style={{ width: '70%' }}
           value={date}

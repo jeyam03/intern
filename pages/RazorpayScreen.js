@@ -3,9 +3,11 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { View, TouchableOpacity, Text, TextInput } from 'react-native';
 import { useTheme } from '../ThemeProvider';
 import RazorpayCheckout from 'react-native-razorpay';
+import { MD3DarkTheme } from "react-native-paper";
 
 const RazorpayScreen = ({ }) => {
   const { paperTheme } = useTheme();
+  const textColor = paperTheme === MD3DarkTheme ? 'lightgray' : 'dimgray'
 
   const [amount, setAmount] = useState("");
   const [name, setName] = useState("");
@@ -17,12 +19,12 @@ const RazorpayScreen = ({ }) => {
 
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 72 }}>
         <Text style={{
-          color: paperTheme.colors.text,
+          color: textColor,
           fontSize: 24,
           fontWeight: 'bold'
         }}>
           Payment Gateway </Text>
-        <Icon name="credit-card-outline" size={32} color={paperTheme.colors.text} />
+        <Icon name="credit-card-outline" size={32} color={textColor} />
       </View>
 
       <InputComponent
@@ -115,12 +117,13 @@ const RazorpayScreen = ({ }) => {
 
 const InputComponent = ({ title, value, onChangeText, placeholder, keyboardType }) => {
   const { paperTheme } = useTheme();
+  const textColor = paperTheme === MD3DarkTheme ? 'lightgray' : 'dimgray'
 
   return (
     <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center', justifyContent: 'center' }}>
 
       <Text style={{
-        color: paperTheme.colors.text,
+        color: textColor,
         fontSize: 16,
         fontWeight: 'semibold',
         margin: 10,
@@ -143,7 +146,7 @@ const InputComponent = ({ title, value, onChangeText, placeholder, keyboardType 
           margin: 10,
           padding: 12,
           width: 200,
-          color: paperTheme.colors.text
+          color: textColor
         }}
       />
 

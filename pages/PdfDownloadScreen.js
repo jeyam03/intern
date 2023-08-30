@@ -6,6 +6,7 @@ import Pdf from "react-native-pdf";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useDownloadContext } from '../DownloadContext';
+import { MD3DarkTheme } from "react-native-paper";
 
 const PdfDownloadScreen = ({ }) => {
   const { paperTheme } = useTheme();
@@ -78,14 +79,17 @@ const PdfDownloadScreen = ({ }) => {
             onChange={(value) => { setSelectedValue(value) }}
             valueField={'value'}
             labelField={'label'}
+            activeColor={paperTheme.colors.primary}
+            selectedTextStyle={{ color: paperTheme.colors.primary }}
+            placeholderStyle={{ color: paperTheme.colors.secondary }}
             style={{ width: '60%' }}
           />
-          : <Text>No PDFs Downloaded</Text>
+          : <Text style={{ color: paperTheme.colors.secondary }}>No PDFs Downloaded</Text>
         }
 
 
         {selectedValue &&
-          <TouchableOpacity onPress={() => removeDownload()} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: 'darkred', padding: 8, borderRadius: 8 }}>
+          <TouchableOpacity onPress={() => removeDownload()} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: paperTheme === MD3DarkTheme ? 'crimson' : 'darkred', padding: 8, borderRadius: 8 }}>
             <Icon name="delete" size={20} color={paperTheme.colors.background} />
             <Text style={{ color: paperTheme.colors.background, marginLeft: 8 }}>Remove</Text>
           </TouchableOpacity>
