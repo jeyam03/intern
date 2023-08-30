@@ -17,6 +17,7 @@ import PdfViewScreen from './pages/PdfViewScreen';
 import PdfDownloadScreen from './pages/PdfDownloadScreen';
 import RazorpayScreen from './pages/RazorpayScreen';
 import UploadFiles from './pages/UploadFiles';
+import DownloadFiles from './pages/DownloadFiles';
 
 export default function App() {
   const Drawer = createDrawerNavigator();
@@ -53,7 +54,7 @@ export default function App() {
                     iconName = focused ? 'file-pdf-box' : 'file-pdf-box';
                   } else if (route.name === 'Razorpay') {
                     iconName = focused ? 'cash-multiple' : 'cash-multiple';
-                  } else if (route.name === 'File Uploads') {
+                  } else if (route.name === 'File Handling') {
                     iconName = focused ? 'nas' : 'nas';
                   }
 
@@ -64,7 +65,7 @@ export default function App() {
               <Drawer.Screen name="YT & Notifications" component={TabNavigation} />
               <Drawer.Screen name="PDF Viewer" component={PdfViewerNavigation} />
               <Drawer.Screen name="Razorpay" component={RazorpayScreen} />
-              <Drawer.Screen name="File Uploads" component={UploadFiles} />
+              <Drawer.Screen name="File Handling" component={FileHandlingNavigation} />
             </Drawer.Navigator>
           </NavigationContainer>
           <StatusBar style="auto" />
@@ -148,6 +149,43 @@ const PdfViewerNavigation = ({ }) => {
     >
       <Tab.Screen name="View PDFs" component={PdfViewScreen} />
       <Tab.Screen name="Downloaded PDFs" component={PdfDownloadScreen} />
+
+    </Tab.Navigator>
+  );
+}
+
+const FileHandlingNavigation = ({ }) => {
+  const Tab = createBottomTabNavigator();
+  const paperTheme = useColorScheme() === 'dark' ? MD3DarkTheme : MD3LightTheme;
+  const paddingBottom = Platform.OS === 'android' ? 4 : 32;
+
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarActiveTintColor: paperTheme.colors.primary,
+        tabBarInactiveTintColor: paperTheme.colors.text,
+        tabBarStyle: {
+          backgroundColor: paperTheme.colors.surface,
+          borderTopColor: paperTheme.colors.border,
+          paddingBottom: paddingBottom,
+        },
+        headerShown: false,
+
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          if (route.name === "Upload Files") {
+            iconName = focused ? 'file-upload-outline' : 'file-upload-outline';
+          } else if (route.name === "Downloaded Files") {
+            iconName = focused ? 'file-download-outline' : 'file-download-outline';
+          }
+
+          return <Icon name={iconName} size={size} color={color} />;
+        }
+      })}
+    >
+      <Tab.Screen name="Upload Files" component={UploadFiles} />
+      <Tab.Screen name="Downloaded Files" component={DownloadFiles} />
 
     </Tab.Navigator>
   );

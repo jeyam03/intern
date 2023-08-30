@@ -68,7 +68,7 @@ const PdfViewScreen = ({ }) => {
   }
 
   const save = async (uri, filename, mimetype) => {
-    if (Platform.OS === "android") {
+    if (Platform.OS === "Android") {
       const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
       if (permissions.granted) {
         const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
