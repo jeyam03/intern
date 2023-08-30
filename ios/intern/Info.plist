@@ -27,6 +27,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
+          <string>intern</string>
           <string>com.jeyam03.intern</string>
         </array>
       </dict>

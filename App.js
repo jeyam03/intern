@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
-import { View, Text, useColorScheme, Image, Platform } from 'react-native';
+import { View, Text, useColorScheme, Image, Platform, AppRegistry } from 'react-native';
 import { MD3DarkTheme, MD3LightTheme, PaperProvider } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -10,6 +10,42 @@ import React, { useEffect } from 'react';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { ThemeProvider } from './ThemeProvider';
 import { DownloadProvider } from './DownloadContext';
+import * as Linking from "expo-linking";
+import notifee, { EventType } from '@notifee/react-native';
+
+notifee.onBackgroundEvent(async ({ type, detail }) => {
+  const { notification, pressAction } = detail;
+
+  async function onMessageReceived(message) {
+    console.log('onMessageReceived', message);
+  }
+
+  messaging().onMessage(onMessageReceived);
+  messaging().setBackgroundMessageHandler(onMessageReceived);
+
+  messaging().setBackgroundMessageHandler(async remoteMessage => {
+    console.log('Message handled in the background!', remoteMessage);
+  });
+
+  if (type === EventType.ACTION_PRESS && pressAction.id === 'mark-as-read') {
+    console.log('Marking notification as read', notification);
+    await notifee.cancelNotification(notification.id);
+  }
+
+  switch (type) {
+    case EventType.DISMISSED:
+      console.log('User dismissed notification in the background', notification);
+      break;
+    case EventType.PRESS:
+      console.log('User pressed notification in the background', notification);
+      break;
+  }
+
+});
+
+AppRegistry.registerComponent('app', () => App);
+
+const prefix = Linking.createURL("/");
 
 import YoutubePlayerScreen from './pages/YoutubePlayerScreen';
 import NotificationScreen from './pages/NotificationScreen';
@@ -27,11 +63,23 @@ export default function App() {
     ScreenOrientation.unlockAsync();
   }, []);
 
+  const linking = {
+    prefixes: [prefix],
+    config: {
+      screens: {
+        "YT & Notifications": "youtube",
+        "PDF Viewer": "pdf",
+        "Razorpay": "razorpay",
+        "File Handling": "file",
+      },
+    },
+  };
+
   return (
     <ThemeProvider>
       <DownloadProvider>
         <PaperProvider theme={paperTheme}>
-          <NavigationContainer>
+          <NavigationContainer linking={linking} >
             <Drawer.Navigator
               drawerContent={(props) => <CustomDrawerContent {...props} />}
               screenOptions={({ route }) => ({

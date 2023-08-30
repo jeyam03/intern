@@ -25,6 +25,7 @@
     "expo-document-picker": "~11.5.4",
     "expo-file-system": "^15.4.3",
     "expo-image-picker": "~14.3.2",
+    "expo-linking": "~5.0.2",
     "expo-permissions": "~14.2.1",
     "expo-screen-orientation": "~6.0.5",
     "expo-sharing": "^11.5.0",

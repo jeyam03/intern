@@ -7,9 +7,9 @@ import RazorpayCheckout from 'react-native-razorpay';
 const RazorpayScreen = ({ }) => {
   const { paperTheme } = useTheme();
 
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState("");
   const [name, setName] = useState("");
-  const [contact, setContact] = useState(0);
+  const [contact, setContact] = useState("");
   const [email, setEmail] = useState("");
 
   return (

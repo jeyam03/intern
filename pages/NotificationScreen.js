@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Text, TouchableOpacity, View, useColorScheme, Button, Alert } from 'react-native';
+import { Text, TouchableOpacity, View, useColorScheme, Button, Alert, Linking } from 'react-native';
 import { useTheme } from '../ThemeProvider';
 import notifee, { AndroidImportance, AndroidStyle, EventType, TimestampTrigger, TriggerType } from '@notifee/react-native';
 import messaging from '@react-native-firebase/messaging';
@@ -17,7 +17,8 @@ const NotificationScreen = ({ }) => {
           console.log('User dismissed notification', detail.notification);
           break;
         case EventType.PRESS:
-          console.log('User pressed notification', detail.notification);
+          console.log('User foreground pressed notification', detail.notification);
+          Linking.openURL(detail.notification.data.route)
           break;
       }
     });
@@ -72,7 +73,7 @@ const NotificationScreen = ({ }) => {
       title: remoteMessage?.notification?.title || 'Notification Title',
       body: remoteMessage?.notification?.body || 'Notification Body',
       subtitle: 'Notification Subtitle',
-
+      data: {'route': 'intern://file'},
       ios: {
         attachments: [
           {
@@ -128,12 +129,13 @@ const NotificationScreen = ({ }) => {
   async function onCreateTriggerNotification() {
     await notifee.createTriggerNotification(
       {
-        title: 'Meeting with Jane',
+        title: 'Your payment is due!',
         body: `Today at ${date.getHours()}:${date.getMinutes()}`,
         subtitle: 'Trigger Notification',
         android: {
           channelId: 'your-channel-id',
         },
+        data: {'route': 'intern://razorpay'},
       },
       {
         type: TriggerType.TIMESTAMP,
@@ -155,7 +157,7 @@ const NotificationScreen = ({ }) => {
         console.log('User dismissed notification', detail.notification);
         break;
       case EventType.PRESS:
-        console.log('User pressed notification', detail.notification);
+        console.log('User background pressed notification', detail.notification);
         break;
     }
   });
